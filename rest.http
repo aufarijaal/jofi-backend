@@ -1,0 +1,35 @@
+POST http://localhost:3001/auth/signin
+Content-Type: application/json
+
+{
+  "email": "aufa@prisma.io",
+  "password": "rahasia"
+}
+###
+POST http://localhost:3001/auth/signup
+###
+POST http://localhost:3001/employer/auth/signup
+###
+POST http://localhost:3001/employer/auth/signin
+Content-Type: application/json
+
+{
+  "email": "hr@biofarma.com",
+  "password": "rahasiaa"
+}
+###
+POST http://localhost:3001/admin/auth/signin
+Content-Type: application/json
+
+{
+  "username": "aufarijal",
+  "password": "rahasia"
+}
+###
+POST http://localhost:3001/admin/test
+
+###
+POST http://localhost:3001/jobs/1/apply
+
+### 
+GET http://localhost:3001/abc/d

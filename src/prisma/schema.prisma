@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ApplicationStatus {
+  RECEIVED
+  UNDER_REVIEW
+  INTERVIEW
+  REJECTED
+  APPROVED
+}
+
+enum EducationLevel {
+  SD
+  SMP
+  SMA
+  D1
+  D2
+  D3
+  D4
+  S1
+  S2
+  S3
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+
+  @@map("admins")
+}
+
+model User {
+  id               Int             @id @default(autoincrement())
+  email            String          @unique
+  password         String
+  isEmployer       Boolean         @default(false) @map("is_employer")
+  employerVerified Boolean         @default(false) @map("employer_verified")
+  profile          Profile?
+  company          Company?        @relation(fields: [companyId], references: [id])
+  companyId        Int?            @map("company_id")
+  jobs             Job[]
+  applications     Application[]
+  savedJobs        SavedJob[]
+  jobExperiences   JobExperience[]
+  educations       Education[]
+  userSkills       UserSkill[]
+
+  @@map("users")
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique @map("user_id")
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photo  String?
+  name   String
+  about  String?
+
+  @@map("profiles")
+}
+
+model Company {
+  id        Int     @id @default(autoincrement())
+  name      String
+  location  String
+  about     String?
+  industry  String?
+  logo      String?
+  slug      String  @unique
+  employers User[]
+  jobs      Job[]
+
+  @@map("companies")
+}
+
+model JobCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  slug String @unique
+  jobs Job[]
+
+  @@map("job_categories")
+}
+
+model Job {
+  id            Int           @id @default(autoincrement())
+  employerId    Int           @map("employer_id")
+  employer      User          @relation(fields: [employerId], references: [id], onDelete: NoAction)
+  companyId     Int           @map("company_id")
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobCategoryId Int           @map("job_category_id")
+  category      JobCategory   @relation(fields: [jobCategoryId], references: [id])
+  title         String
+  description   String
+  requirements  String
+  salary        Decimal
+  location      String
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime?     @map("updated_at")
+  deletedAt     DateTime?     @map("deleted_at")
+  applications  Application[]
+  savedJobs     SavedJob[]
+
+  @@map("jobs")
+}
+
+model Application {
+  id        Int               @id @default(autoincrement())
+  userId    Int               @map("user_id")
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     Int               @map("job_id")
+  job       Job               @relation(fields: [jobId], references: [id], onDelete: Restrict)
+  status    ApplicationStatus @default(RECEIVED)
+  createdAt DateTime          @default(now()) @map("created_at")
+  deletedAt DateTime?         @map("deleted_at")
+
+  @@map("applications")
+}
+
+model SavedJob {
+  id     Int  @id @default(autoincrement())
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  Int  @map("job_id")
+  job    Job  @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@map("saved_jobs")
+}
+
+model JobExperience {
+  id          Int       @id @default(autoincrement())
+  title       String
+  companyName String    @map("company_name")
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  isCurrent   Boolean   @default(true) @map("is_current")
+
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("job_experiences")
+}
+
+model Education {
+  id          Int            @id @default(autoincrement())
+  level       EducationLevel
+  institution String
+  major       String
+  startDate   DateTime       @map("start_date")
+  endDate     DateTime?      @map("end_date")
+  isCurrent   Boolean        @default(true) @map("is_current")
+
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("educations")
+}
+
+model Skill {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  slug       String      @unique
+  userSkills UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id     Int  @id @default(autoincrement())
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  skillId Int   @map("skill_id")
+  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Restrict)
+
+  @@map("user_skills")
+}
