@@ -9,7 +9,7 @@ export const tokenUtil = {
       expiresIn?: string | number
     ) => {
       const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-        expiresIn: expiresIn ?? process.env.JWT_EXPIRE_TIME,
+        expiresIn: '7d',
       })
 
       return token
@@ -24,7 +24,7 @@ export const tokenUtil = {
         payload,
         process.env.JWT_REFRESH_SECRET as string,
         {
-          expiresIn: expiresIn ?? process.env.JWT_REFRESH_EXPIRE_TIME,
+          expiresIn: '365d',
         }
       )
 

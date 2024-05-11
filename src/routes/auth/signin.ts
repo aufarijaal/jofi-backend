@@ -4,6 +4,7 @@ import { cookieOptions } from '../../lib/cookie-options'
 import authService from '../../services/auth-service'
 import { AppError } from '../../lib/error'
 import { NextFunction, Request, Response } from 'express'
+import { AuthError } from '@supabase/supabase-js'
 
 export const post = [
   check('email').notEmpty().isString().isEmail().trim(),
@@ -39,8 +40,10 @@ export const post = [
         return res
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: 'Account not found' })
-      } else if (error instanceof AppError) {
-        return res.status(error.statusCode).send({ message: error.message })
+      } else if (error && error.name === 'AuthError') {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send({ message: error.message })
       }
 
       next(error)

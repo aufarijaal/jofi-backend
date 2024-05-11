@@ -33,7 +33,7 @@ declare global {
 
 async function main() {
   const app = express()
-  const port = 3001
+  const port = process.env.PORT
 
   app.use(cookieParser())
   app.use(express.static(path.join(__dirname, 'public/uploads')))
@@ -41,7 +41,7 @@ async function main() {
   app.use(express.json())
   app.use(
     cors({
-      origin: ['https://jofi-frontend.vercel.app', 'http://localhost:3000'],
+      origin: JSON.parse(process.env.ALLOWED_ORIGINS as string),
       credentials: true,
     })
   )
@@ -78,7 +78,9 @@ async function main() {
     }
   })
 
-  app.use('/', await router())
+  app.use('/', await router({
+    directory: path.join(__dirname, process.env.ROUTE_FOLDER as string)
+  }))
 
   app.get('/info', (req, res) => {
     const routes = extractExpressRoutes(app)

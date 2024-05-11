@@ -14,7 +14,6 @@ export const post = [
         // zero skillId means that the client sending new skill data
         // that is not available in skills table
         if (skillId > 0) {
-          console.log(`skillId is 0`)
           await tx.userSkill.create({
             data: {
               skillId,
@@ -25,7 +24,6 @@ export const post = [
           // if skillId is not greater than zero it means that the client wants
           // to add an existing skill from skills table into their userSkill
         } else if (skillId === 0) {
-          console.log(`skillId is ${skillId}`)
           const newSkill = await tx.skill.create({
             data: {
               name,

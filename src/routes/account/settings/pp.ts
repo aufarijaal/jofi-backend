@@ -1,4 +1,4 @@
-import multer, { MulterError } from 'multer'
+import multer, { MulterError, memoryStorage } from 'multer'
 import { authenticatedRoleCheck } from '../../../middleware/authenticated-role-check'
 import { photoProfileStorage } from '../../../middleware/upload-handlers'
 import { NextFunction, Request, Response } from 'express'
@@ -6,11 +6,14 @@ import { StatusCodes } from 'http-status-codes'
 import prisma from '../../../prisma/client'
 import { rm, rmSync } from 'fs'
 import { join } from 'path'
+import supabase from '../../../lib/supabase'
+import { decode } from 'base64-arraybuffer'
+import dayjs from 'dayjs'
 
 const upload = multer({
-  storage: photoProfileStorage,
+  storage: memoryStorage(),
   limits: {
-    fileSize: 1 * 1024 * 1024,
+    fileSize: 500 * 1024,
   },
 }).single('pp')
 
@@ -21,7 +24,7 @@ export const put = [
       upload(req, res, async function (err) {
         if (err instanceof MulterError && err.code === 'LIMIT_FILE_SIZE') {
           return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send({
-            message: 'Maximum file size is 1MB',
+            message: 'Maximum file size is 500KB',
           })
         }
 
@@ -32,6 +35,18 @@ export const put = [
             .status(StatusCodes.BAD_REQUEST)
             .send({ message: 'No file is selected.' })
         }
+
+        const filename = `${dayjs().valueOf()}-${file?.originalname}`
+
+        supabase.storage
+          .from('photo-profiles')
+          .upload(filename, decode(file?.buffer.toString('base64')), {
+            contentType: file?.mimetype,
+          })
+          .catch((error) => {
+            console.log(error)
+            next(error)
+          })
 
         const userInfo = await prisma.user.findFirstOrThrow({
           where: {
@@ -47,13 +62,12 @@ export const put = [
         })
 
         if (userInfo.profile?.photo) {
-          rmSync(
-            join(
-              __dirname,
-              '../../../uploads/photo-profiles',
-              userInfo.profile?.photo
-            )
-          )
+          supabase.storage
+            .from('photo-profiles')
+            .remove([userInfo.profile?.photo])
+            .catch((error) => {
+              next(error)
+            })
         }
 
         await prisma.user.update({
@@ -63,7 +77,7 @@ export const put = [
           data: {
             profile: {
               update: {
-                photo: file.filename,
+                photo: filename,
               },
             },
           },

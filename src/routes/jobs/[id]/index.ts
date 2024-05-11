@@ -60,6 +60,15 @@ export const del = [
 
       res.status(StatusCodes.NO_CONTENT).send()
     } catch (error) {
+      if(error instanceof PrismaClientKnownRequestError) {
+        console.log(error.message)
+
+        if(error.message.includes('Foreign key constraint failed')) {
+          return res.status(StatusCodes.BAD_REQUEST).send({
+            message: "Unable to delete. Because other data depends on it."
+          })
+        }
+      }
       next(error)
     }
   },

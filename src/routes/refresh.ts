@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 
 export const post = [
   async function (req: Request, res: Response, next: NextFunction) {
-    console.log(`kadaluarsa nih. minta lagi dong.`)
+    // console.log(`kadaluarsa nih. minta lagi dong.`)
     res.send()
     // try {
     //   const { refresh } = req.body

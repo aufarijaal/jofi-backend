@@ -55,6 +55,7 @@ model User {
   jobExperiences   JobExperience[]
   educations       Education[]
   userSkills       UserSkill[]
+  Rate             Rate[]
 
   @@map("users")
 }
@@ -185,4 +186,14 @@ model UserSkill {
   skill   Skill @relation(fields: [skillId], references: [id], onDelete: Restrict)
 
   @@map("user_skills")
+}
+
+model Rate {
+  id      Int     @id @default(autoincrement())
+  userId  Int     @map("user_id")
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rate    Int
+  message String?
+
+  @@map("rates")
 }

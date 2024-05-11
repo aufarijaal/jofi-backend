@@ -9,6 +9,7 @@ import multer from 'multer'
 import slugify from 'slugify'
 import * as PrismaClient from '@prisma/client'
 import { authenticatedRoleCheck } from '../../middleware/authenticated-role-check'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export const get = [
   async (req: Request, res: Response, next: NextFunction) => {
@@ -108,6 +109,13 @@ export const post = [
 
       res.status(StatusCodes.CREATED).send()
     } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .send({ message: 'Company already exists' })
+        }
+      }
       next(error)
     }
   },
