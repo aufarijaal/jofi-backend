@@ -41,7 +41,7 @@ async function main() {
   app.use(express.json())
   app.use(
     cors({
-      origin: JSON.parse(process.env.ALLOWED_ORIGINS as string),
+      origin: process.env.ALLOWED_ORIGINS as string,
       credentials: true,
     })
   )
@@ -106,5 +106,5 @@ async function main() {
 }
 
 main().then((app) => {
-  expressListRoutes(app)
+  // expressListRoutes(app)
 })
