@@ -3,3 +3,5 @@ dist/
 *.env*
 .ngrok
 *.zip
+src/uploads
+env.d.ts
