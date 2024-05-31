@@ -36,7 +36,7 @@ async function main() {
   const port = process.env.PORT
 
   app.use(cookieParser())
-  app.use(express.static(path.join(__dirname, 'public/uploads')))
+  // app.use(express.static(path.join(__dirname, 'public/uploads')))
   app.use(morgan('tiny'))
   app.use(express.json())
   app.use(
@@ -78,9 +78,12 @@ async function main() {
     }
   })
 
-  app.use('/', await router({
-    directory: path.join(__dirname, process.env.ROUTE_FOLDER as string)
-  }))
+  app.use(
+    '/',
+    await router({
+      directory: path.join(__dirname, process.env.ROUTE_FOLDER as string),
+    })
+  )
 
   app.get('/info', (req, res) => {
     const routes = extractExpressRoutes(app)
@@ -106,5 +109,7 @@ async function main() {
 }
 
 main().then((app) => {
-  // expressListRoutes(app)
+  if (process.env.NODE_ENV === 'development') {
+    expressListRoutes(app)
+  }
 })
