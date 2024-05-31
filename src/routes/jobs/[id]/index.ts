@@ -14,6 +14,7 @@ export const put = [
   body('requirements').exists().isArray({ min: 1 }),
   body('salary').exists().isNumeric(),
   body('location').exists().notEmpty(),
+  body('active').exists().isBoolean(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = validationResult(req)
@@ -38,6 +39,7 @@ export const put = [
             .join('~'),
           salary: req.body.salary,
           location: req.body.location,
+          active: req.body.active,
         },
       })
 
@@ -60,12 +62,12 @@ export const del = [
 
       res.status(StatusCodes.NO_CONTENT).send()
     } catch (error) {
-      if(error instanceof PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         console.log(error.message)
 
-        if(error.message.includes('Foreign key constraint failed')) {
+        if (error.message.includes('Foreign key constraint failed')) {
           return res.status(StatusCodes.BAD_REQUEST).send({
-            message: "Unable to delete. Because other data depends on it."
+            message: 'Unable to delete. Because other data depends on it.',
           })
         }
       }

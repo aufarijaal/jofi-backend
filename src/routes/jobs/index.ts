@@ -125,6 +125,7 @@ export const post = [
   body('requirements').exists().isArray({ min: 1 }),
   body('salary').exists().isNumeric(),
   body('location').exists().notEmpty(),
+  body('active').exists().isBoolean(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = validationResult(req)
@@ -146,6 +147,7 @@ export const post = [
             .join('~'),
           salary: req.body.salary,
           location: req.body.location,
+          active: req.body.active,
         },
       })
 
